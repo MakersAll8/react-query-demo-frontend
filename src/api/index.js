@@ -27,6 +27,19 @@ export const getCitiesApi = async ()=>{
   return promise;
 }
 
+export const getPaginatedCitiesApi = async ({page, size})=>{
+  // use CancelToken to dedupe api request
+  // e.g. cancel duplicate request that comes from typing search field
+  const source = CancelToken.source();
+  const promise = axios.get(`/cities/${size}/${(page-1)*size}`, {
+    cancelToken: source.token
+  }).then(res => res.data);
+  promise.cancel = () =>{
+    source.cancel('Query was cancelled by react-query');
+  }
+  return promise;
+}
+
 export const getCityApi = async ({id})=>{
   // use CancelToken to dedupe api request
   // e.g. cancel duplicate request that comes from typing search field
@@ -42,5 +55,10 @@ export const getCityApi = async ({id})=>{
 
 export const updateCityApi = async ({id, city, province, country, zip}) => {
   const response = await axios.put('/cities', {id, city, province, country, zip});
+  return response.data;
+}
+
+export const createCityApi = async ({city, province, country, zip}) => {
+  const response = await axios.post('/cities', {city, province, country, zip});
   return response.data;
 }
